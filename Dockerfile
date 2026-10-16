@@ -1,10 +1,8 @@
-FROM python:3.10.5
+FROM python:3.10-slim
 
-RUN apt update && apt upgrade -y
-RUN apt install git curl python3-pip -y
-RUN pip3 install -U pip
-RUN mkdir /sree/
-WORKDIR /sree/
-COPY . /sree/
-RUN pip3 install -U -r requirements.txt
-CMD python3 main.py
+WORKDIR /app
+COPY . /app
+
+RUN pip install telethon python-dotenv
+
+CMD ["python3", "main.py"]
