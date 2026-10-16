@@ -23,12 +23,14 @@ API_ID = int(getenv("API_ID", "4110592"))
 API_HASH = getenv("API_HASH", "aa7c849566922168031b95212860ede0")
 BOT_TOKEN = getenv("BOT_TOKEN", None)
 BOT_TOKEN_2 = getenv("BOT_TOKEN_2", None) 
+BOT_TOKEN_3 = getenv("BOT_TOKEN_3", None) # 3rd Bot Token
 OWNER_ID = getenv("OWNER_ID", None)
 OP  = [int(g), int(gg), int(OWNER_ID)] if OWNER_ID else [int(g), int(gg)]
 
-# Dual Clients Setup
+# Triple Clients Setup
 bot1 = TelegramClient("Bot1", api_id=API_ID, api_hash=API_HASH)
 bot2 = TelegramClient("Bot2", api_id=API_ID, api_hash=API_HASH)
+bot3 = TelegramClient("Bot3", api_id=API_ID, api_hash=API_HASH)
 
 Owner = "https://t.me/ALONE_WAS_BOT"
 repo = "https://github.com/TeamAloneOp/AloneXBanallBot/fork"
@@ -115,32 +117,46 @@ async def bun(event):
             await bot1.send_message(event.sender_id, f"__I Don't Have Sufficient Rights To Do This in {cht.title}.__")
             return
             
-        hmm = await bot1.send_message(event.sender_id, f"__Ye Bilek Migic Begins with Dual Bots in {cht.title} 🥳...__")
-        
         everyone = await bot1.get_participants(event.chat_id)
         bot1_me = await bot1.get_me()
         
-        try:
-            bot2_me = await bot2.get_me()
-            await bot2.get_participants(event.chat_id) # Bot 2 entity cache update
-        except Exception as e:
-            await bot1.send_message(event.sender_id, f"⚠️ **Warning:** Bot 2 group-la illa illa admin ah illa! Bot 1 vachu mattum ban pandren.\nError: `{e}`")
-            await ban_task(bot1, everyone, event.chat_id, bot1_me.id)
-            await bot1.send_message(event.sender_id, f"**Ban Completed using Bot 1 alone in {cht.title}!** ✅")
-            return
+        active_bots = [(bot1, bot1_me)]
         
-        mid = len(everyone) // 2
-        half1 = everyone[:mid]
-        half2 = everyone[mid:]
+        # Checking Bot 2
+        if BOT_TOKEN_2:
+            try:
+                bot2_me = await bot2.get_me()
+                await bot2.get_participants(event.chat_id)
+                active_bots.append((bot2, bot2_me))
+            except Exception as e:
+                await bot1.send_message(event.sender_id, f"⚠️ **Bot 2 Error:** `{e}`")
+                
+        # Checking Bot 3
+        if BOT_TOKEN_3:
+            try:
+                bot3_me = await bot3.get_me()
+                await bot3.get_participants(event.chat_id)
+                active_bots.append((bot3, bot3_me))
+            except Exception as e:
+                await bot1.send_message(event.sender_id, f"⚠️ **Bot 3 Error:** `{e}`")
+
+        num_bots = len(active_bots)
+        await bot1.send_message(event.sender_id, f"__Ye Bilek Migic Begins with {num_bots} Bots in {cht.title} 🥳...__")
         
-        print(f"Starting dual ban... Bot 1: {len(half1)} members, Bot 2: {len(half2)} members")
+        # Split list dynamically based on active bots
+        chunk_size = len(everyone) // num_bots
+        tasks = []
         
-        await asyncio.gather(
-            ban_task(bot1, half1, event.chat_id, bot1_me.id),
-            ban_task(bot2, half2, event.chat_id, bot2_me.id)
-        )
-        
-        await bot1.send_message(event.sender_id, f"**Ban Completed in {cht.title} using Both Bots!** ✅")
+        for i in range(num_bots):
+            client, me_user = active_bots[i]
+            start_idx = i * chunk_size
+            end_idx = (i + 1) * chunk_size if i < num_bots - 1 else len(everyone)
+            chunk = everyone[start_idx:end_idx]
+            tasks.append(ban_task(client, chunk, event.chat_id, me_user.id))
+            print(f"{client.session.filename} processing {len(chunk)} members...")
+            
+        await asyncio.gather(*tasks)
+        await bot1.send_message(event.sender_id, f"**Ban Completed in {cht.title} using {num_bots} Bots!** ✅")
 
 @bot1.on(events.NewMessage(pattern="^/restart"))
 async def restart(jnl):
@@ -152,7 +168,8 @@ async def restart(jnl):
         await bot1.send_message(jnl.sender_id, "__Wait Restarting...__")
         try:
             await bot1.disconnect()
-            await bot2.disconnect()
+            if BOT_TOKEN_2: await bot2.disconnect()
+            if BOT_TOKEN_3: await bot3.disconnect()
         except Exception:
             pass
         os.execl(sys.executable, sys.executable, *sys.argv)
@@ -179,18 +196,18 @@ async def leave(z):
             ok = await bot1.send_message(z.sender_id, "__Wait Leaving...__")
             try:
                 await bot1(LeaveChannelRequest(mkb))
-                await bot2(LeaveChannelRequest(mkb))
-                await ok.edit("**Both Bots Succesfully Lefted!!**")
+                if BOT_TOKEN_2: await bot2(LeaveChannelRequest(mkb))
+                if BOT_TOKEN_3: await bot3(LeaveChannelRequest(mkb))
+                await ok.edit("**All Active Bots Succesfully Lefted!!**")
             except Exception as e:
                 await ok.edit(str(e))
 
-# Running both bots
+# Running all bots
 bot1.start(bot_token=BOT_TOKEN)
-if BOT_TOKEN_2:
-    bot2.start(bot_token=BOT_TOKEN_2)
-    print("Dual Bots Deployed Successfully ✅")
-else:
-    print("Bot 2 Token missing! Running single bot only. Add BOT_TOKEN_2 in env.")
+if BOT_TOKEN_2: bot2.start(bot_token=BOT_TOKEN_2)
+if BOT_TOKEN_3: bot3.start(bot_token=BOT_TOKEN_3)
+
+print(f"Bots Deployed Successfully ✅")
 print("Join @AlonesHeaven if you facing any kind of issue!!")
 
 asyncio.get_event_loop().run_forever()
