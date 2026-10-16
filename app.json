@@ -3,24 +3,8 @@
   "description": "Telegram's bilek migic.",
   "keywords": ["python", "telegram"],
   "logo": "https://telegra.ph//file/9e8ce3092848a1bc5d9d6.jpg",
-  "repository": "https://telegra.ph//file/9e8ce3092848a1bc5d9d6.jpg",
+  "repository": "https://github.com/denki307/banallx",
   "stack": "container",
-  "addons": [
-      {
-         "options": {
-            "version": "12"
-         },
-         "plan": "heroku-postgresql"
-      }
-   ],
-   "buildpacks": [
-    {
-      "url": "https://github.com/heroku/heroku-buildpack-python"
-    },
-    {
-      "url": "https://github.com/jonathanong/heroku-buildpack-ffmpeg-latest"
-    }
-  ],
   "env": {
         "BOT_TOKEN": {
             "description": "A bot token from @BotFather",
@@ -40,4 +24,3 @@
         }
     }
 }
-
