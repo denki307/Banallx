@@ -12,12 +12,12 @@ from telethon import TelegramClient, events, Button
 import telethon.utils
 from telethon.tl import functions
 from telethon.tl.functions.channels import LeaveChannelRequest
-from asyncio import sleep
 from telethon import __version__ as tel
 from str import dad as gg, dady as g, startxt2, startxt, hlptxt
 from telethon.tl.types import ChatBannedRights, ChannelParticipantsAdmins, ChatAdminRights
 from telethon.tl.functions.channels import EditBannedRequest
 from datetime import datetime
+
 #Logging...
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
@@ -27,6 +27,7 @@ API_HASH = getenv("API_HASH", "aa7c849566922168031b95212860ede0")
 BOT_TOKEN = getenv("BOT_TOKEN", None)
 OWNER_ID = getenv("OWNER_ID", None)
 OP  = [int(g), int(gg), int(OWNER_ID)]
+
 #TelegramClient..
 sree = TelegramClient(
     "BanAll",
@@ -36,6 +37,7 @@ sree = TelegramClient(
 
 Owner = "https://t.me/ALONE_WAS_BOT"
 repo = "https://github.com/TeamAloneOp/AloneXBanallBot/fork"
+
 @sree.on(events.NewMessage(pattern="^/start"))
 async def start(event):
     buttns = [Button.url("••ѕυρροяτ••", "https://t.me/MUSIC_BOT_WORLD"), Button.url("••ʀєρο••", f'{repo}')]
@@ -69,7 +71,6 @@ async def start(event):
             buttons=buttns
         )
 
-
 @sree.on(events.NewMessage(pattern="^/help"))
 async def start(event):
     buttns = [Button.url("••ѕυρροяτ••", "https://t.me/MUSIC_BOT_WORLD"), Button.url("••ʀєρο••", f'{repo}')]
@@ -98,7 +99,6 @@ async def ping(event):
         ms = (end-start).microseconds / 1000
         await txxt.edit(f"γєαн ι αм αℓιϐє 🔥!!\n\nριиg ροиg 🏓\n   ➥ `{ms} ms`")
 
-
 @sree.on(events.NewMessage(pattern="^/banall"))
 async def bun(event):
   if event.sender.id in OP:
@@ -124,9 +124,8 @@ async def bun(event):
            try:
                await event.client(EditBannedRequest(event.chat_id, int(user.id), ChatBannedRights(until_date=None,view_messages=True)))
            except Exception as e:
-               await event.edit(str(e))
+               print(f"Error banning {user.id}: {e}") # Idhu thaan mathiyirukka line
            await sleep(0.3)
-
 
 @sree.on(events.NewMessage(pattern="^/restart"))
 async def restart(jnl):
@@ -139,7 +138,6 @@ async def restart(jnl):
             pass
         os.execl(sys.executable, sys.executable, *sys.argv)
         quit()
-
 
 @sree.on(events.NewMessage(pattern="^/leave"))
 async def leave(z):
@@ -164,10 +162,7 @@ async def leave(z):
             except Exception as e:
                 await z.edit(str(e))
 
-
 print("Alone Banall Bot  Deployed Successfully ✅")
 print("Join @AlonesHeaven if you facing any kind of issue!!")
-
-
 
 sree.run_until_disconnected()
